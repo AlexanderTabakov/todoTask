@@ -1,9 +1,10 @@
 import React from 'react';
+import MainPage from "pages/MainPage";
 
 export function App() {
     return (
-        <div>
-            Hello world!
-        </div>
+        <>
+            <MainPage/>
+        </>
     );
 }

@@ -4,9 +4,9 @@ import ReactDOM from 'react-dom'
 import {BrowserRouter} from "react-router-dom";
 
 const root = (
-        <BrowserRouter>
-            <App />
-        </BrowserRouter>
+    <BrowserRouter>
+        <App />
+    </BrowserRouter>
 )
 
 ReactDOM.render(
