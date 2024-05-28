@@ -1,12 +1,12 @@
 import { create } from "zustand";
-import { devtools } from "zustand/middleware";
+import { devtools, persist } from "zustand/middleware";
 import axios from "axios";
 
 export interface IData {
     id: number;
-    // title: string;  //TODO не забыть убрать закоменченный код
-    // attributes: IItem[];
-    attributes: any;
+    // title: string;  //TODO не забыть убрать закоменченный код и исправить типы
+    attributes: IItem;
+    // attributes: any;
 }
 export interface IItem {
     title: string,
@@ -29,6 +29,8 @@ export interface IState {
 }
 
 const useStore = create(
+
+    persist(
     devtools<IState>((set, get) => ({
         data: [],
         loading: false,
@@ -99,7 +101,12 @@ const useStore = create(
         //         set(() => ({ hasErrors: true, loading: false }));
         //     }
         // },
-    })),
+    })), {
+            // name: 'yourApp', // optional, name to use for localStorage key
+            name: "todos-storage",
+            // getStorage: () => sessionStorage
+            // whitelist: ['data'], // optional, only data will be persisted //TODO разобраться с персистом
+        }),
 );
 
 useStore.getState().getData();
