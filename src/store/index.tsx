@@ -5,7 +5,8 @@ import axios from "axios";
 export interface IData {
     id: number;
     // title: string;  //TODO не забыть убрать закоменченный код
-    attributes: IItem[];
+    // attributes: IItem[];
+    attributes: any;
 }
 export interface IItem {
     title: string,
