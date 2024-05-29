@@ -24,8 +24,12 @@ export interface IState {
     getData?: () => Promise<void>;
     postData?: any; /// TODO разобраться с типами!!!!
     // postData?: (task: IItem, id: number) => Promise<void>; /// TODO разобраться с типами!!!!
-    addTask?: (newTask: IItem) => void;
+    // addTask?: (newTask: IItem) => void;
+    addTask?: any,
     removeTask?: (id: number) => void;
+    sortByActive?:any
+    sortByCompleted?:any
+    reset?:any,
 }
 
 const useStore = create(
@@ -51,6 +55,39 @@ const useStore = create(
                 set(() => ({ hasErrors: true, loading: false }));
             }
         },
+
+        sortByActive (){
+            const sortByActive = get().data.filter((a)=> a.attributes.status==='active');
+            set({data: sortByActive});
+        },
+
+        sortByCompleted (){
+            const sortCompleted = get().data.filter((a)=> a.attributes.status==='completed');
+            set({data: sortCompleted});
+        },
+
+        // reset: () => {
+        //     set((data: IState) => ({data})); //  TODO замутить функцию очистки фильтрации
+        // },
+
+
+        addTask:async (newTodo:IItem) => {
+            set(() => ({ loading: true }));
+            try {
+                const response = await axios.post(
+                    "https://cms.dev-land.host/api/tasks", newTodo
+
+                );
+
+                // set((state: IState) => ({
+                //     data: (state.data = response.data.data),
+                //     loading: false,
+                // }));
+            } catch (err) {
+                set(() => ({ hasErrors: true, loading: false }));
+            }
+        },
+
 
         // addTask(newTask: IItem) {
         //     const columnIndex: any = get().data.findIndex(

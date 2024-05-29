@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import styled from "styled-components";
 import {Button, Input, Modal, Select} from "antd";
+import useStore from "store";
 
 
 const Container = styled.div`
@@ -28,6 +29,8 @@ const AddToDoModal = () => {
         setStatus(value)
     };
 
+    const{addTask} = useStore()
+
 
     const [formValues, setFormValues] = useState(null);
     const [taskTitle, seTaskTitle] = useState("");
@@ -53,18 +56,28 @@ const AddToDoModal = () => {
     const onSubmit = (e: Event) => {
         e.preventDefault();
         let createdAt = Date.now();
+        // const newFormValue = {
+        //     // id: id, // TODO Не забыть убрать закоменченный код и логи
+        //     taskTitle: taskTitle,
+        //     taskDescription: taskDescription,
+        //     status: status,
+        //     createdAt:createdAt,
+        //     updatedAt:"2024-05-28T16:29:41.590Z",
+        //     publishedAt:"2024-05-28T16:18:36.076Z",
+        // };
+
         const newFormValue = {
-            // id: id, // TODO Не забыть убрать закоменченный код и логи
-            taskTitle: taskTitle,
-            taskDescription: taskDescription,
-            status: status,
-            createdAt:createdAt,
-            updatedAt:"2024-05-28T16:29:41.590Z",
-            publishedAt:"2024-05-28T16:18:36.076Z",
+           data:{
+               title: taskTitle,
+               description: taskDescription,
+               status: status,
+           }
         };
 
 
-        // addTask(newFormValue);
+
+
+        addTask(newFormValue);
         // Очистить поля ввода после отправки
         seTaskTitle("");
         setTaskDescription("");
@@ -83,7 +96,6 @@ const AddToDoModal = () => {
                 <Input placeholder="Description" type="text" onChange={changeTaskDescription} />
 
                 <Select
-                    defaultValue="Active"
                     style={{ width: 120 }}
 
                     onChange={handleChange}
