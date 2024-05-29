@@ -40,7 +40,6 @@ const AddToDoModal = () => {
 
 
 
-    const [formValues, setFormValues] = useState(null);
     const [taskTitle, seTaskTitle] = useState("");
     const [taskDescription, setTaskDescription] = useState("");
     const [status, setStatus] = useState("");
@@ -64,15 +63,6 @@ const AddToDoModal = () => {
     const onSubmit = (e: Event) => {
         e.preventDefault();
         let createdAt = Date.now();
-        // const newFormValue = {
-        //     // id: id, // TODO Не забыть убрать закоменченный код и логи
-        //     taskTitle: taskTitle,
-        //     taskDescription: taskDescription,
-        //     status: status,
-        //     createdAt:createdAt,
-        //     updatedAt:"2024-05-28T16:29:41.590Z",
-        //     publishedAt:"2024-05-28T16:18:36.076Z",
-        // };
 
         const newFormValue = {
            data:{
@@ -82,11 +72,7 @@ const AddToDoModal = () => {
            }
         };
 
-
-
-
         addTask(newFormValue);
-        // Очистить поля ввода после отправки
         seTaskTitle("");
         setTaskDescription("");
         console.log("newFormValue", newFormValue);

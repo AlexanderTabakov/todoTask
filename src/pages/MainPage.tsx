@@ -1,11 +1,11 @@
-import React, {useState} from 'react';
+import React from 'react';
 import useStore from "store";
 import AddToDoModal from "components/AddToDoModal";
 import TodoCard from "components/TodoCard";
 import {Button} from "antd";
 
 const MainPage = () => {
-    const {data, sortByActive, sortByCompleted, copiedData, reset, addToFavorite, removeFromFavorite, sortByFav, deleteTodo} = useStore();
+    const { sortByActive, sortByCompleted, copiedData, reset, addToFavorite, removeFromFavorite, sortByFav, deleteTodo, changeStatus} = useStore();
 
 
     return (
@@ -37,6 +37,7 @@ const MainPage = () => {
                         addToFav={()=>addToFavorite(item)}
                         removeFromFav={()=>removeFromFavorite(item.id)}
                         deleteTodo={()=>deleteTodo(item.id)}
+                        changeStatus={()=>changeStatus(item.id, item)}
                     />
                 ))}
             </div>

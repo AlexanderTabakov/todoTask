@@ -1,13 +1,12 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
-import {parse, stringify, toJSON, fromJSON} from 'flatted'
 import axios from "axios";
 
 export interface IData {
     id: number;
     // title: string;  //TODO не забыть убрать закоменченный код и исправить типы
     attributes: IItem;
-    // attributes: any;
+
 }
 export interface IItem {
     id?:number,
@@ -39,6 +38,7 @@ export interface IState {
     removeFromFavorite?:any,
     sortByFav?:any,
     deleteTodo?: any,
+    changeStatus?:any,
 
 }
 
@@ -81,19 +81,22 @@ const useStore = create(
             }
         },
 
+        changeStatus: async (id:number, item:any) => {
+            set(() => ({ loading: true }));
+            try {
+                const response = await axios.put(
+                    `https://cms.dev-land.host/api/tasks/${id}`, item
+                );
+
+            } catch (err) {
+                set(() => ({ hasErrors: true, loading: false }));
+            }
+        },
+
         copyData: () => {
             set((state:IState) => ({ copiedData: (state.data) }));
         },
 
-        // sortByActive (){
-        //     const sortByActive = get().copiedData.sort((a:any, b:any)=> a.attributes.status < b.attributes.status);
-        //     set({copiedData: sortByActive});
-        // },
-        //
-        // sortByCompleted (){
-        //     const sortCompleted = get().copiedData.sort((a:any, b:any)=> a.attributes.status > b.attributes.status);
-        //     set({copiedData: sortCompleted});
-        // },
 
         sortByActive (){
             const sortByActive = get().data.filter((a)=> a.attributes.status==='active');
@@ -140,6 +143,7 @@ const useStore = create(
             const  removeOrder = [...get().favoriteTodos.filter((t:IData)=>t.id!==id) ]
             set({favoriteTodos:removeOrder})
         },
+
 
 
 
