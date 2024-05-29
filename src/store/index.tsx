@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
+import {parse, stringify, toJSON, fromJSON} from 'flatted'
 import axios from "axios";
 
 export interface IData {
@@ -9,6 +10,7 @@ export interface IData {
     // attributes: any;
 }
 export interface IItem {
+    id?:number,
     title: string,
     description: string,
     status: string,
@@ -30,6 +32,14 @@ export interface IState {
     sortByActive?:any
     sortByCompleted?:any
     reset?:any,
+    copiedData:any,
+    copyData:any,
+    favoriteTodos?:any,
+    addToFavorite?:any
+    removeFromFavorite?:any,
+    sortByFav?:any,
+    deleteTodo?: any,
+
 }
 
 const useStore = create(
@@ -37,6 +47,8 @@ const useStore = create(
     persist(
     devtools<IState>((set, get) => ({
         data: [],
+        copiedData: [],
+        favoriteTodos:[],
         loading: false,
         hasErrors: false,
 
@@ -56,19 +68,53 @@ const useStore = create(
             }
         },
 
+
+        deleteTodo: async (id:number) => {
+            set(() => ({ loading: true }));
+            try {
+                const response = await axios.delete(
+                    `https://cms.dev-land.host/api/tasks/${id}`,
+                );
+
+            } catch (err) {
+                set(() => ({ hasErrors: true, loading: false }));
+            }
+        },
+
+        copyData: () => {
+            set((state:IState) => ({ copiedData: (state.data) }));
+        },
+
+        // sortByActive (){
+        //     const sortByActive = get().copiedData.sort((a:any, b:any)=> a.attributes.status < b.attributes.status);
+        //     set({copiedData: sortByActive});
+        // },
+        //
+        // sortByCompleted (){
+        //     const sortCompleted = get().copiedData.sort((a:any, b:any)=> a.attributes.status > b.attributes.status);
+        //     set({copiedData: sortCompleted});
+        // },
+
         sortByActive (){
             const sortByActive = get().data.filter((a)=> a.attributes.status==='active');
-            set({data: sortByActive});
+            set({copiedData: sortByActive});
         },
 
         sortByCompleted (){
             const sortCompleted = get().data.filter((a)=> a.attributes.status==='completed');
-            set({data: sortCompleted});
+            set({copiedData: sortCompleted});
         },
 
-        // reset: () => {
-        //     set((data: IState) => ({data})); //  TODO замутить функцию очистки фильтрации
-        // },
+
+        sortByFav (){
+            set((copiedData:any) => ({ copiedData: get().favoriteTodos }));
+        },
+
+
+
+        reset: () => {
+            set((state:IState) => ({ copiedData: (state.data) }));
+        },
 
 
         addTask:async (newTodo:IItem) => {
@@ -79,66 +125,26 @@ const useStore = create(
 
                 );
 
-                // set((state: IState) => ({
-                //     data: (state.data = response.data.data),
-                //     loading: false,
-                // }));
             } catch (err) {
                 set(() => ({ hasErrors: true, loading: false }));
             }
         },
 
 
-        // addTask(newTask: IItem) {
-        //     const columnIndex: any = get().data.findIndex(
-        //         (d) => d.title === "Not Started",
-        //     );
-        //     if (columnIndex !== -1) {
-        //         const newTasks = [...get().data[columnIndex].items, newTask];
-        //         const newColumns = [
-        //             ...get().data.slice(0, columnIndex),
-        //             { ...get().data[columnIndex], items: newTasks },
-        //             ...get().data.slice(columnIndex + 1),
-        //         ];
-        //         set({ data: newColumns });
-        //     }
-        // },
+        addToFavorite(newTodo:IItem) {
+            const favTest = [...get().favoriteTodos, newTodo]
+            set({favoriteTodos: favTest });
+        },
 
-        // removeTask(id: number) {
-        //     const newData = get().data.map((column) => ({
-        //         ...column,
-        //         items: column.items.filter((item) => item.id !== id),
-        //     }));
-        //     set({ data: newData });
-        // },
+        removeFromFavorite (id:number) {
+            const  removeOrder = [...get().favoriteTodos.filter((t:IData)=>t.id!==id) ]
+            set({favoriteTodos:removeOrder})
+        },
 
-        // postData: async (upDatedItems: IItem, id: number) => {
-        //     set(() => ({ loading: true }));
-        //     try {
-        //         const response = await axios.put(
-        //             `https://66374e40288fedf6937ffce3.mockapi.io/boards/${id}`,
-        //             {
-        //                 items: upDatedItems,
-        //             },
-        //
-        //         );
-        //
-        //         // @ts-ignore
-        //         set((state:IState) => ({
-        //             data: state.data.map((column) =>
-        //                 column.id === id ? { ...column, items: upDatedItems } : column
-        //             ),
-        //             loading: false,
-        //         }));
-        //
-        //         set((state: IState) => ({
-        //             loading: false,
-        //         }));
-        //     } catch (err) {
-        //         set(() => ({ hasErrors: true, loading: false }));
-        //     }
-        // },
-    })), {
+
+
+    })),
+        {
             // name: 'yourApp', // optional, name to use for localStorage key
             name: "todos-storage",
             // getStorage: () => sessionStorage
@@ -147,5 +153,7 @@ const useStore = create(
 );
 
 useStore.getState().getData();
+useStore.getState().copyData();
+
 
 export default useStore;

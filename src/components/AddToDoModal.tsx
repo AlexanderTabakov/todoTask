@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import styled from "styled-components";
 import {Button, Input, Modal, Select} from "antd";
 import useStore from "store";
@@ -29,7 +29,15 @@ const AddToDoModal = () => {
         setStatus(value)
     };
 
-    const{addTask} = useStore()
+    const{addTask, getData, copyData} = useStore()
+
+    useEffect(() => {
+
+        setTimeout(copyData(), 1000)
+         //TODO понять как сделать асинхронщиной
+    }, []);
+
+
 
 
     const [formValues, setFormValues] = useState(null);

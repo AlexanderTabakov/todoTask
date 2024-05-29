@@ -1,22 +1,38 @@
 import React from 'react';
-import { Card } from 'antd';
-import Meta from "antd/es/card/Meta";
-import {IItem} from "store";
+import {Button, Card} from 'antd';
+import useStore, {IData, IItem} from "store";
 
 
+interface IProps extends IItem {
+    id?:number,
+    addToFav?:any,
+    removeFromFav?:any,
+    deleteTodo?:any,
+}
 
-const TodoCard:React.FC<IItem> = ({title, status, description}) => {
+
+const TodoCard:React.FC<IProps> = ({title, status, description, addToFav, removeFromFav,deleteTodo}) => {
+
+
     return (
         <div>
             <Card
                 hoverable
                 style={{ width: 240 }}
-                // cover={<img alt="example" src="https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png" />}
             >
-                {/*<Meta title="Europe Street beat" description="www.instagram.com" />*/}
+
+                <Button type="primary" onClick={addToFav}>Add To Favorite</Button>
+                <Button type="primary" onClick={removeFromFav}>Remove From Favorite</Button>
+                <Button type="primary" onClick={deleteTodo}>Delete TODO</Button>
+
+
+
+
                 <p>{title}</p>
                 <p>{description}</p>
                 <p>{status}</p>
+
+
 
 
             </Card>
