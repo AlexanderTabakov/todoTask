@@ -3,169 +3,160 @@ import { devtools, persist } from "zustand/middleware";
 import axios from "axios";
 
 export interface IData {
-    id: number;
-    // title: string;  //TODO не забыть убрать закоменченный код и исправить типы
-    attributes: IItem;
-
+  id: number;
+  // title: string;  //TODO не забыть убрать закоменченный код и исправить типы
+  attributes: IItem;
 }
 export interface IItem {
-    id?:number,
-    title: string,
-    description: string,
-    status: string,
-    createdAt?: string,
-    updatedAt?: string,
-    publishedAt?: string,
+  id?: number;
+  title: string;
+  description: string;
+  status: string;
+  createdAt?: string;
+  updatedAt?: string;
+  publishedAt?: string;
 }
 
 export interface IState {
-    data: IData[];
-    loading: boolean;
-    hasErrors: boolean;
-    getData?: () => Promise<void>;
-    postData?: any; /// TODO разобраться с типами!!!!
-    // postData?: (task: IItem, id: number) => Promise<void>; /// TODO разобраться с типами!!!!
-    // addTask?: (newTask: IItem) => void;
-    addTask?: any,
-    removeTask?: (id: number) => void;
-    sortByActive?:any
-    sortByCompleted?:any
-    reset?:any,
-    copiedData:any,
-    copyData:any,
-    favoriteTodos?:any,
-    addToFavorite?:any
-    removeFromFavorite?:any,
-    sortByFav?:any,
-    deleteTodo?: any,
-    changeStatus?:any,
-    nextPAge?:number,
-
+  data: IData[];
+  loading: boolean;
+  hasErrors: boolean;
+  getData?: () => Promise<void>;
+  /// TODO разобраться с типами!!!!
+  // addTask?: (newTodo: IItem) => Promise<void>;
+  addTask?: any;
+  sortByActive?: () => void;
+  sortByCompleted?: () => void;
+  reset?: () => void;
+  copiedData: IData[];
+  copyData: () => void;
+  favoriteTodos?: IItem[];
+  // addToFavorite?:(newTodo: IItem) => void;
+  addToFavorite?: any;
+  removeFromFavorite?: (id: number) => void;
+  sortByFav?: () => void;
+  // sortByFav?:any,
+  deleteTodo?: (id: number) => void;
+  changeStatus?: (id: number, item: IItem) => Promise<void>;
+  nextPage?: number;
 }
 
 const useStore = create(
-
-    persist(
+  persist(
     devtools<IState>((set, get) => ({
-        data: [],
-        copiedData: [],
-        favoriteTodos:[],
-        loading: false,
-        hasErrors: false,
-        nextPAge: 0,
+      data: [],
+      copiedData: [],
+      favoriteTodos: [],
+      loading: false,
+      hasErrors: false,
+      nextPage: 0,
 
-        getData: async () => {
-            set(() => ({ loading: true }));
-            try {
-                const nextPage =  get().nextPAge
-                const response = await axios.get(
-                    `https://cms.dev-land.host/api/tasks?pagination%5BwithCount%5D=true&pagination%5Bpage%5D=${nextPage}`,
-                );
+      getData: async () => {
+        set(() => ({ loading: true }));
+        try {
+          const nextPage = get().nextPage;
+          const response = await axios.get(
+            `https://cms.dev-land.host/api/tasks?pagination%5BwithCount%5D=true&pagination%5Bpage%5D=${nextPage}`,
+          );
 
-                set((state: IState) => ({
-                    data: (state.data = response.data.data),
-                    loading: false,
-                    nextPage: state.nextPAge + 1
-                }));
-            } catch (err) {
-                set(() => ({ hasErrors: true, loading: false }));
-            }
-        },
+          set((state: IState) => ({
+            data: (state.data = response.data.data),
+            loading: false,
+            nextPage: state.nextPage + 1,
+          }));
+        } catch (err) {
+          set(() => ({ hasErrors: true, loading: false }));
+        }
+      },
 
+      deleteTodo: async (id: number) => {
+        set(() => ({ loading: true }));
+        try {
+          const response = await axios.delete(
+            `https://cms.dev-land.host/api/tasks/${id}`,
+          );
+        } catch (err) {
+          set(() => ({ hasErrors: true, loading: false }));
+        }
+      },
 
-        deleteTodo: async (id:number) => {
-            set(() => ({ loading: true }));
-            try {
-                const response = await axios.delete(
-                    `https://cms.dev-land.host/api/tasks/${id}`,
-                );
+      changeStatus: async (id: number, item: IItem) => {
+        const { title, description, status } = item;
+        const test = { data: { title, description, status } };
+        // set(() => ({ loading: true }));
+        try {
+          const response = await axios.put(
+            `https://cms.dev-land.host/api/tasks/${id}`,
+            test,
+          );
+        } catch (err) {
+          set(() => ({ hasErrors: true, loading: false }));
+        }
+      },
 
-            } catch (err) {
-                set(() => ({ hasErrors: true, loading: false }));
-            }
-        },
+      copyData: () => {
+        set((state: IState) => ({ copiedData: state.data }));
+      },
 
-        changeStatus: async (id:number, item:IItem) => {
-            const {title, description, status} = item
-            const test =
-                {data:
-                    {title, description, status}}
-            set(() => ({ loading: true }));
-            try {
-                const response = await axios.put(
-                    `https://cms.dev-land.host/api/tasks/${id}`, test
-                );
+      sortByActive() {
+        const sortByActive = get().data.filter(
+          (a) => a.attributes.status === "active",
+        );
+        set({ copiedData: sortByActive });
+      },
 
-            } catch (err) {
-                set(() => ({ hasErrors: true, loading: false }));
-            }
-        },
+      sortByCompleted() {
+        const sortCompleted = get().data.filter(
+          (a) => a.attributes.status === "completed",
+        );
+        set({ copiedData: sortCompleted });
+      },
 
-        copyData: () => {
-            set((state:IState) => ({ copiedData: (state.data) }));
-        },
+      sortByFav() {
+        // @ts-ignore
+        set((copiedData) => ({ copiedData: get().favoriteTodos }));
+      },
 
+      reset: () => {
+        set((state: IState) => ({ copiedData: state.data }));
+      },
 
-        sortByActive (){
-            const sortByActive = get().data.filter((a)=> a.attributes.status==='active');
-            set({copiedData: sortByActive});
-        },
+      addTask: async (newTodo: IItem) => {
+        // set(() => ({ loading: true }));  // TODO убрать комменты
 
-        sortByCompleted (){
-            const sortCompleted = get().data.filter((a)=> a.attributes.status==='completed');
-            set({copiedData: sortCompleted});
-        },
+        try {
+          const response = await axios.post(
+            "https://cms.dev-land.host/api/tasks",
+            newTodo,
+          );
+        } catch (err) {
+          set(() => ({ hasErrors: true, loading: false }));
+        }
+      },
 
+      addToFavorite(newTodo: IItem) {
+        const favTest = [...get().favoriteTodos, newTodo];
+        set({ favoriteTodos: favTest });
+      },
 
-        sortByFav (){
-            set((copiedData:any) => ({ copiedData: get().favoriteTodos }));
-        },
-
-
-
-        reset: () => {
-            set((state:IState) => ({ copiedData: (state.data) }));
-        },
-
-
-        addTask:async (newTodo:IItem) => {
-            set(() => ({ loading: true }));
-            try {
-                const response = await axios.post(
-                    "https://cms.dev-land.host/api/tasks", newTodo
-
-                );
-
-            } catch (err) {
-                set(() => ({ hasErrors: true, loading: false }));
-            }
-        },
-
-
-        addToFavorite(newTodo:IItem) {
-            const favTest = [...get().favoriteTodos, newTodo]
-            set({favoriteTodos: favTest });
-        },
-
-        removeFromFavorite (id:number) {
-            const  removeOrder = [...get().favoriteTodos.filter((t:IData)=>t.id!==id) ]
-            set({favoriteTodos:removeOrder})
-        },
-
-
-
-
+      removeFromFavorite(id: number) {
+        const removeFav = [...get().favoriteTodos.filter((t) => t.id !== id)];
+        set({ favoriteTodos: removeFav });
+      },
     })),
-        {
-            // name: 'yourApp', // optional, name to use for localStorage key
-            name: "todos-storage",
-            // getStorage: () => sessionStorage
-            // whitelist: ['data'], // optional, only data will be persisted //TODO разобраться с персистом
-        }),
+    {
+      name: "todos-storage",
+      partialize: (state) => ({
+        test: state.favoriteTodos,
+        test2: state.addToFavorite,
+        test3: state.sortByFav,
+        test4: state.removeFromFavorite,
+      }),
+    },
+  ),
 );
 
-useStore.getState().getData();
-useStore.getState().copyData();
-
+// useStore.getState().getData();
+// useStore.getState().copyData();
 
 export default useStore;

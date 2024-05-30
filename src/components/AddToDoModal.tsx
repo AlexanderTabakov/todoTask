@@ -1,108 +1,126 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import {Button, Input, Modal, Select} from "antd";
+import { Button, Input, Modal, Select } from "antd";
 import useStore from "store";
-
+import TextArea from "antd/es/input/TextArea";
 
 const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  .modal {
     display: flex;
-    flex-direction: column;
-`
+    gap: 5px;
+    column-gap: 10px;
+    .textArea {
+      gap: 10px;
+    }
+  }
+`;
 
 const AddToDoModal = () => {
-    const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const showModal = () => {
-        setIsModalOpen(true);
+  const showModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleOk = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleChange = (value: string) => {
+    setStatus(value);
+  };
+
+  const { addTask, getData, copyData, deleteTodo } = useStore();
+
+  // useEffect(() => {
+  //     getData().then(r => copyData())
+  //
+  //     // setTimeout(copyData(), 1000)
+  //      //TODO понять как сделать асинхронщиной
+  // }, [addTask ]);
+
+  const [taskTitle, seTaskTitle] = useState("");
+  const [taskDescription, setTaskDescription] = useState("");
+  const [status, setStatus] = useState("");
+
+  const changeTaskTitle = (
+    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+  ) => {
+    seTaskTitle((e.target as HTMLInputElement).value.trim());
+  };
+
+  const changeTaskDescription = (
+    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+  ) => {
+    setTaskDescription((e.target as HTMLInputElement).value.trim());
+  };
+
+  const onSubmit = (e: Event) => {
+    e.preventDefault();
+    let createdAt = Date.now();
+
+    const newFormValue = {
+      data: {
+        title: taskTitle,
+        description: taskDescription,
+        status: status,
+      },
     };
 
-    const handleOk = () => {
-        setIsModalOpen(false);
-    };
+    addTask(newFormValue);
+    seTaskTitle("");
+    setTaskDescription("");
+  };
 
-    const handleCancel = () => {
-        setIsModalOpen(false);
-    };
+  return (
+    <Container>
+      <Button type="primary" onClick={showModal}>
+        ADD TODO
+      </Button>
+      <Modal
+        className={"modal"}
+        style={{ gap: 10 }}
+        title="Add TODO"
+        open={isModalOpen}
+        onOk={handleOk}
+        onCancel={handleCancel}
+        footer={null}
+      >
+        <Input
+          placeholder="Title"
+          type="text"
+          style={{ height: 50, marginBottom: 5 }}
+          onChange={changeTaskTitle}
+        />
 
-    const handleChange = (value: string) => {
-        console.log(`selected ${value}`);
-        setStatus(value)
-    };
+        <div className={"textArea"}>
+          <TextArea
+            onChange={changeTaskDescription}
+            placeholder={"Description"}
+            rows={4}
+          ></TextArea>
+        </div>
 
-    const{addTask, getData, copyData} = useStore()
-
-    useEffect(() => {
-        getData().then(r => copyData())
-
-        // setTimeout(copyData(), 1000)
-         //TODO понять как сделать асинхронщиной
-    }, []);
-
-
-
-
-    const [taskTitle, seTaskTitle] = useState("");
-    const [taskDescription, setTaskDescription] = useState("");
-    const [status, setStatus] = useState("");
-
-    const changeTaskTitle = (
-        e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
-    ) => {
-        seTaskTitle((e.target as HTMLInputElement).value.trim());
-    };
-
-    console.log('taskName', taskTitle)
-
-    const changeTaskDescription = (
-        e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
-    ) => {
-        setTaskDescription((e.target as HTMLInputElement).value.trim());
-    };
-
-    console.log('taskDesc', taskDescription)
-
-    const onSubmit = (e: Event) => {
-        e.preventDefault();
-        let createdAt = Date.now();
-
-        const newFormValue = {
-           data:{
-               title: taskTitle,
-               description: taskDescription,
-               status: status,
-           }
-        };
-
-        addTask(newFormValue);
-        seTaskTitle("");
-        setTaskDescription("");
-        console.log("newFormValue", newFormValue);
-    };
-
-
-
-    return (
-        <Container>
-            <Button type="primary" onClick={showModal}>
-                ADD TODO
-            </Button>
-            <Modal title="Add TODO" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
-                <Input placeholder="Title" type="text" onChange={changeTaskTitle} />
-                <Input placeholder="Description" type="text" onChange={changeTaskDescription} />
-
-                <Select
-                    style={{ width: 120 }}
-
-                    onChange={handleChange}
-                    options={[
-                        { value: 'active', label: 'Active' },
-                        { value: 'completed', label: 'Completed' },
-                    ]}
-                />
-                <Button type="primary" onClick={() => onSubmit(event)} >ADD TODO</Button>
-            </Modal>
-        </Container>
-    );
+        <Select
+          style={{ width: 120 }}
+          onChange={handleChange}
+          options={[
+            { value: "active", label: "Active" },
+            { value: "completed", label: "Completed" },
+          ]}
+        />
+        <Button type="primary" onClick={() => onSubmit(event)}>
+          ADD TODO
+        </Button>
+      </Modal>
+    </Container>
+  );
 };
 
 export default AddToDoModal;
