@@ -39,6 +39,7 @@ export interface IState {
     sortByFav?:any,
     deleteTodo?: any,
     changeStatus?:any,
+    nextPAge?:number,
 
 }
 
@@ -51,17 +52,20 @@ const useStore = create(
         favoriteTodos:[],
         loading: false,
         hasErrors: false,
+        nextPAge: 0,
 
         getData: async () => {
             set(() => ({ loading: true }));
             try {
+                const nextPage =  get().nextPAge
                 const response = await axios.get(
-                    "https://cms.dev-land.host/api/tasks",
+                    `https://cms.dev-land.host/api/tasks?pagination%5BwithCount%5D=true&pagination%5Bpage%5D=${nextPage}`,
                 );
 
                 set((state: IState) => ({
                     data: (state.data = response.data.data),
                     loading: false,
+                    nextPage: state.nextPAge + 1
                 }));
             } catch (err) {
                 set(() => ({ hasErrors: true, loading: false }));

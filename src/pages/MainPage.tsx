@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import useStore from "store";
 import AddToDoModal from "components/AddToDoModal";
 import TodoCard from "components/TodoCard";
@@ -8,11 +8,24 @@ const MainPage = () => {
     const { sortByActive, sortByCompleted, copiedData, reset, addToFavorite, removeFromFavorite, sortByFav, deleteTodo, changeStatus} = useStore();
 
 
-    const changeStatusTest = (item:any, id:any) => {
-        const {title, description, status} = item
-        const test = {title, description, status}
-        changeStatus(test)
-    }
+    // const changeStatusTest = (item:any, id:any) => {
+    //     const {title, description, status} = item
+    //     const test = {title, description, status}
+    //     changeStatus(test)
+    // }
+
+
+    const handleScroll = () => {
+        const { scrollTop, clientHeight, scrollHeight } = document.documentElement;
+        if (scrollTop + clientHeight >= scrollHeight - 20) {
+            useStore.getState().getData();
+        }
+    };
+
+    useEffect(() => {
+        window.addEventListener("scroll", handleScroll);
+        return window.addEventListener("scroll", handleScroll);
+    }, []);
 
 
 
