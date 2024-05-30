@@ -13,9 +13,9 @@ export interface IItem {
     title: string,
     description: string,
     status: string,
-    createdAt: string,
-    updatedAt: string,
-    publishedAt: string,
+    createdAt?: string,
+    updatedAt?: string,
+    publishedAt?: string,
 }
 
 export interface IState {
@@ -81,11 +81,15 @@ const useStore = create(
             }
         },
 
-        changeStatus: async (id:number, item:any) => {
+        changeStatus: async (id:number, item:IItem) => {
+            const {title, description, status} = item
+            const test =
+                {data:
+                    {title, description, status}}
             set(() => ({ loading: true }));
             try {
                 const response = await axios.put(
-                    `https://cms.dev-land.host/api/tasks/${id}`, item
+                    `https://cms.dev-land.host/api/tasks/${id}`, test
                 );
 
             } catch (err) {

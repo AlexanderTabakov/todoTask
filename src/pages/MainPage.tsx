@@ -8,6 +8,15 @@ const MainPage = () => {
     const { sortByActive, sortByCompleted, copiedData, reset, addToFavorite, removeFromFavorite, sortByFav, deleteTodo, changeStatus} = useStore();
 
 
+    const changeStatusTest = (item:any, id:any) => {
+        const {title, description, status} = item
+        const test = {title, description, status}
+        changeStatus(test)
+    }
+
+
+
+
     return (
 
         <>
@@ -23,21 +32,21 @@ const MainPage = () => {
 
 
 
+
+
             <div>
 
-                {copiedData?.map((item: { id: React.Key; attributes: { title: string; description: string; status: string; createdAt: string; updatedAt: string; publishedAt: string; }; }) => (
+                {copiedData?.map((item: { id: number; attributes: { title: string; description: string; status: string; }; }) => (
                     <TodoCard
                         key={item.id}
                         title={item.attributes.title}
                         description={item.attributes.description}
                         status={item.attributes.status}
-                        createdAt={item.attributes.createdAt}
-                        updatedAt={item.attributes.updatedAt}
-                        publishedAt={item.attributes.publishedAt}
                         addToFav={()=>addToFavorite(item)}
                         removeFromFav={()=>removeFromFavorite(item.id)}
                         deleteTodo={()=>deleteTodo(item.id)}
-                        changeStatus={()=>changeStatus(item.id, item)}
+                        changeStatus={()=>changeStatus(item.id, item.attributes)}
+
                     />
                 ))}
             </div>

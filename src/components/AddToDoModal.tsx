@@ -32,8 +32,9 @@ const AddToDoModal = () => {
     const{addTask, getData, copyData} = useStore()
 
     useEffect(() => {
+        getData().then(r => copyData())
 
-        setTimeout(copyData(), 1000)
+        // setTimeout(copyData(), 1000)
          //TODO понять как сделать асинхронщиной
     }, []);
 
