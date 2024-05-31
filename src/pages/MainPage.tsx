@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
-import useStore, { IData, IItem } from "store";
+import useStore, { IData } from "store";
 import AddToDoModal from "components/AddToDoModal";
 import TodoCard from "components/TodoCard";
-import { Button, Flex, Spin } from "antd";
+import { Button, Spin } from "antd";
 import styled from "styled-components";
 
 const Container = styled.main`
@@ -39,21 +39,21 @@ const MainPage = () => {
     deleteTodo,
     changeStatus,
     loading,
-    hasErrors,
     getData,
     addTask,
-    nextPage,
     copyData,
+    hasErrors,
   } = useStore();
 
   const handleScroll = () => {
     const { scrollTop, clientHeight, scrollHeight } = document.documentElement;
     if (scrollTop + clientHeight >= scrollHeight - 20) {
       useStore.getState().getData();
+      useStore.getState().changePage();
+    } else {
+      useStore.getState().resetPage();
     }
   };
-
-  // window.addEventListener("scroll", handleScroll);
 
   useEffect(() => {
     window.addEventListener("scroll", handleScroll);
@@ -64,9 +64,19 @@ const MainPage = () => {
     getData().then(copyData);
   }, [deleteTodo, reset, addTask]);
 
-  if (hasErrors) {
-    return <div> An Error has occurred... Reload page </div>;
-  }
+  // if (hasErrors) {
+  //     return <div> An Error has occurred... Reload page </div>;
+  // }
+
+  const [status, setStatus] = React.useState("");
+
+  const changingStatus = (
+    e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>,
+    item: IData,
+  ) => {
+    setStatus((e.target as HTMLInputElement).value);
+    changeStatus(item.id, item.attributes);
+  };
 
   return (
     <Container>
@@ -82,7 +92,7 @@ const MainPage = () => {
       {loading && <Spin className={"spinner"} />}
 
       <div>
-        {copiedData?.map((item) => (
+        {copiedData?.map((item: IData) => (
           <TodoCard
             key={item.id}
             title={item.attributes.title}
@@ -91,7 +101,7 @@ const MainPage = () => {
             addToFav={() => addToFavorite(item)}
             removeFromFav={() => removeFromFavorite(item.id)}
             deleteTodo={() => deleteTodo(item.id)}
-            changeStatus={() => changeStatus(item.id, item.attributes)}
+            changeStatus={() => changeStatus(item.id, item.attributes.status)}
           />
         ))}
       </div>

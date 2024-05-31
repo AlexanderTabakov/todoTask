@@ -1,10 +1,9 @@
 import { create } from "zustand";
-import { devtools, persist } from "zustand/middleware";
+import { devtools, persist, PersistOptions } from "zustand/middleware";
 import axios from "axios";
 
 export interface IData {
   id: number;
-  // title: string;  //TODO не забыть убрать закоменченный код и исправить типы
   attributes: IItem;
 }
 export interface IItem {
@@ -22,13 +21,12 @@ export interface IState {
   loading: boolean;
   hasErrors: boolean;
   getData?: () => Promise<void>;
-  /// TODO разобраться с типами!!!!
   // addTask?: (newTodo: IItem) => Promise<void>;
   addTask?: any;
   sortByActive?: () => void;
   sortByCompleted?: () => void;
   reset?: () => void;
-  copiedData: IData[];
+  copiedData: any;
   copyData: () => void;
   favoriteTodos?: IItem[];
   // addToFavorite?:(newTodo: IItem) => void;
@@ -39,6 +37,10 @@ export interface IState {
   deleteTodo?: (id: number) => void;
   changeStatus?: (id: number, item: IItem) => Promise<void>;
   nextPage?: number;
+  changePage?: () => void;
+  prevPage: () => void;
+  resetPage: () => void;
+  onSet?: (state: IState) => void;
 }
 
 const useStore = create(
@@ -51,6 +53,21 @@ const useStore = create(
       hasErrors: false,
       nextPage: 0,
 
+      changePage: () => {
+        const plus1 = get().nextPage + 1;
+        set({ nextPage: plus1 });
+      },
+
+      prevPage: () => {
+        const minus1 = get().nextPage - 1;
+        set({ nextPage: minus1 });
+      },
+
+      resetPage: () => {
+        const reset = (get().nextPage = 0);
+        set({ nextPage: reset });
+      },
+
       getData: async () => {
         set(() => ({ loading: true }));
         try {
@@ -62,9 +79,10 @@ const useStore = create(
           set((state: IState) => ({
             data: (state.data = response.data.data),
             loading: false,
-            nextPage: state.nextPage + 1,
+            // nextPage: state.nextPage + 1,
           }));
         } catch (err) {
+          console.log(err);
           set(() => ({ hasErrors: true, loading: false }));
         }
       },
@@ -76,6 +94,7 @@ const useStore = create(
             `https://cms.dev-land.host/api/tasks/${id}`,
           );
         } catch (err) {
+          console.log(err);
           set(() => ({ hasErrors: true, loading: false }));
         }
       },
@@ -90,6 +109,7 @@ const useStore = create(
             test,
           );
         } catch (err) {
+          console.log(err);
           set(() => ({ hasErrors: true, loading: false }));
         }
       },
@@ -113,16 +133,17 @@ const useStore = create(
       },
 
       sortByFav() {
-        // @ts-ignore
-        set((copiedData) => ({ copiedData: get().favoriteTodos }));
+        const sortByFavTest = [...get().favoriteTodos];
+        set({ copiedData: sortByFavTest });
       },
 
       reset: () => {
+        get().getData();
         set((state: IState) => ({ copiedData: state.data }));
       },
 
       addTask: async (newTodo: IItem) => {
-        // set(() => ({ loading: true }));  // TODO убрать комменты
+        // set(() => ({ loading: true }));
 
         try {
           const response = await axios.post(
@@ -143,20 +164,32 @@ const useStore = create(
         const removeFav = [...get().favoriteTodos.filter((t) => t.id !== id)];
         set({ favoriteTodos: removeFav });
       },
+
+      onSet: (state: IState) => {
+        localStorage.setItem("todos-storage", JSON.stringify(state));
+      },
     })),
     {
+      key: "todoTasks",
       name: "todos-storage",
-      partialize: (state) => ({
-        test: state.favoriteTodos,
-        test2: state.addToFavorite,
-        test3: state.sortByFav,
-        test4: state.removeFromFavorite,
-      }),
-    },
+      getStorage: () => sessionStorage,
+
+      blackList: ["data", "copiedData"],
+
+      // partialize: (state:IState) => ({
+      //     test: state.favoriteTodos,
+      //     // test2:state.copiedData,
+      //     // test3: state.addToFavorite,
+      //     // test4: state.sortByFav,
+      //     // test5: state.removeFromFavorite,
+      //     // test6: state.data
+      //     // test7:state.nextPage
+      // }),
+    } as PersistOptions<any> & { blackList: string[] },
   ),
 );
 
-// useStore.getState().getData();
-// useStore.getState().copyData();
+useStore.getState().getData();
+useStore.getState().copyData();
 
 export default useStore;
