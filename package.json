@@ -1,14 +1,17 @@
 {
   "name": "Todo-App",
-  "homepage": "https://gitname.github.io/react-gh-pages",
+  "homepage": "https://github.com/AlexanderTabakov/todoTask.git",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "start": "webpack serve --env port=3000",
     "test": "jest",
     "build:prod": "webpack --env mode=production",
     "build:dev": "webpack --env mode=development",
+    "build": "webpack --env mode=development",
     "lint:ts": "eslint \"**/*.{ts,tsx}\"",
     "lint:ts:fix": "eslint \"**/*.{ts,tsx}\" --fix"
   },
